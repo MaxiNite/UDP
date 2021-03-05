@@ -23,7 +23,7 @@ public class FrameCliente extends javax.swing.JFrame {
         initComponents();
         this.cliente = new ConexionCliente("localhost", 4444);
         this.cliente.levantarConexion(nombre);
-        //this.cliente.ejecutarConexion();
+        this.cliente.ejecutarConexion();
     }
 
     /**
