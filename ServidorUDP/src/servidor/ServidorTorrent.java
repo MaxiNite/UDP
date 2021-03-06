@@ -25,8 +25,7 @@ public class ServidorTorrent {
     
     private DatagramSocket socketServer;
     private final int TAMANIO_PACKET = 11;
-    private ArrayList<Conexion> conexiones;
-    private int CONEXIONES_MAX = 10;
+    private int CONEXIONES_MAX = 100;
     private ExecutorService service;
     private int coreCount;
     private ArrayList<File> archivos;
@@ -34,11 +33,15 @@ public class ServidorTorrent {
     
     public ServidorTorrent(int port){
         this.archivos = new ArrayList();
+        this.archivos.add(new File("archivos\\Shrek.txt"));
+        this.archivos.add(new File("archivos\\Bee Movie.txt"));
+        this.archivos.add(new File("archivos\\Sausage Party.txt"));
+        this.archivos.add(new File("archivos\\Avengers Endgame.txt"));
+        this.archivos.add(new File("archivos\\Wall-E.txt"));
         this.archivos.add(new File("archivos\\ejemplo.txt"));
         System.out.println(this.archivos.get(0).getName());
         try {
             this.socketServer = new DatagramSocket(port);
-            this.conexiones = new ArrayList();
         } catch (IOException ex) {
             Logger.getLogger(ServidorTorrent.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -76,7 +79,7 @@ public class ServidorTorrent {
                 System.out.println("El cliente "  + packet.getPort() + " se ha conectado.");
                 
                 System.out.println("Contenido paquete: " + new String(packet.getData()));
-                String solicitud = new String(packet.getData());
+                String solicitud = ((char)packet.getData()[0]) + "";
                 this.procesarSolicitud(solicitud);
                 
             } catch (IOException ex) {
@@ -99,21 +102,15 @@ public class ServidorTorrent {
         }
         
         private File determinarArchivo(String nombre){
-
-            for(File f : archivos){
-                if(f.getName().equalsIgnoreCase(nombre)){
-            
-                    return f;
-                }
-            }
-            return null;
+            return archivos.get(Integer.parseInt(nombre));
         }
         
         private byte[][] enpaquetarArchivo(File archivo) throws IOException{
-            
+            System.out.println("Nombre del archivito " + archivo.getName());
             FileInputStream in = new FileInputStream(archivo);
             byte[] datos = new byte[in.available()];
             in.read(datos);
+            in.close();
             int cantPaquetes = (int)Math.ceil((double)(datos.length)/TAMANIO_PACKET);
             byte[][] paquetes = new byte[cantPaquetes][TAMANIO_PACKET];
             

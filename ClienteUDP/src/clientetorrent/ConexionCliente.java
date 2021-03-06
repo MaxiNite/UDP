@@ -31,11 +31,13 @@ public class ConexionCliente {
     private DataInputStream bufferDeEntrada = null;
     private DataOutputStream bufferDeSalida = null;
     private final int TAMANIO_PACKET = 11;
+    private String numeroArchivo;
     
     public ConexionCliente(String direccionServidor, int puertoServidor) {
         try {
             socket = new DatagramSocket();
             this.paquetes = new ArrayList();
+            this.puertoServidor = puertoServidor;
             this.sendPacked = new DatagramPacket(
                     new byte[this.TAMANIO_PACKET], 
                     this.TAMANIO_PACKET,
@@ -47,9 +49,8 @@ public class ConexionCliente {
         }
     }
     
-    public void levantarConexion(String nombre) {
+    public void levantarConexion() {
         try {
-            this.enviar(nombre.getBytes());
             System.out.println("Conectado a :");
         } catch (Exception e) {
             System.out.println("Excepción al levantar conexión: " + e.getMessage());
@@ -69,7 +70,13 @@ public class ConexionCliente {
 
     public void enviar(byte[] datos) {
         try {
+            this.sendPacked = new DatagramPacket(
+                    new byte[this.TAMANIO_PACKET], 
+                    this.TAMANIO_PACKET,
+                    InetAddress.getByName("localhost"),
+                    puertoServidor);
             this.sendPacked.setData(datos); 
+            this.numeroArchivo = ((char)sendPacked.getData()[0]) + "";
             this.socket.send(this.sendPacked);
         } catch (Exception e) {
             e.printStackTrace();
@@ -133,12 +140,31 @@ System.out.println("Tamaño datos" + datosArchivo.length);
         } 
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(new File("descargas\\ejemplo.txt"));
+            out = new FileOutputStream(new File("descargas\\" + this.determinarNombre(numeroArchivo)));
             out.write(datosArchivo);
             out.close();
         } catch (Exception e) {
             e.printStackTrace();
         } 
-        
+        this.paquetes = new ArrayList();
+    }
+    
+    private String determinarNombre(String numero){
+        switch(numero){
+            case "0":
+                return "Shrek.txt";
+            case "1":
+                return "Bee Movie.txt";
+            case "2":
+                return "Sausage Party.txt";
+            case "3":
+                return "Avenger Endgame.txt";
+            case "4":
+                return "Wall-E.txt";
+            case "5":
+                return "ejemplo.txt";
+            default:
+                return null;
+        }
     }
 }
